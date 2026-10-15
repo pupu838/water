@@ -1,0 +1,51 @@
+name: Deploy to Tencent CloudBase
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - index.html
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    if: ${{ vars.TCB_ENABLED == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Prepare static website
+        shell: bash
+        run: |
+          mkdir -p dist
+          cp index.html dist/index.html
+
+      - name: Install CloudBase CLI
+        run: npm install -g @cloudbase/cli
+
+      - name: Login to Tencent Cloud
+        env:
+          TCB_SECRET_ID: ${{ secrets.TCB_SECRET_ID }}
+          TCB_SECRET_KEY: ${{ secrets.TCB_SECRET_KEY }}
+        shell: bash
+        run: |
+          test -n "$TCB_SECRET_ID" && test -n "$TCB_SECRET_KEY" || { echo "Missing Tencent Cloud credentials"; exit 1; }
+          tcb login --apiKeyId "$TCB_SECRET_ID" --apiKey "$TCB_SECRET_KEY"
+
+      - name: Deploy static files
+        env:
+          TCB_ENV_ID: ${{ secrets.TCB_ENV_ID }}
+        shell: bash
+        run: |
+          test -n "$TCB_ENV_ID" || { echo "Missing CloudBase environment ID"; exit 1; }
+          tcb hosting deploy ./dist / -e "$TCB_ENV_ID"
