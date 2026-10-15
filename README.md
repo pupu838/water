@@ -22,14 +22,21 @@
 
 官方文档：https://docs.cloudbase.net/hosting/web-hosting
 
-## GitHub Actions 自动发布到腾讯云（可选）
+## GitHub Actions 同步到现有腾讯云环境
 
-仓库提供 `.github/workflows/cloudbase.yml`。默认不部署，直到启用。
+已部署的网站不需要重新创建。自动化工作流 `.github/workflows/cloudbase.yml` 使用现有的 CloudBase 环境和原部署日志中的云端路径 `/agri-water-remote-sensing`，以保留现有路径和域名绑定。
 
-1. 在 GitHub 仓库 Settings → Secrets and variables → Actions → Secrets 中，配置 `TCB_SECRET_ID`、`TCB_SECRET_KEY` 和 `TCB_ENV_ID`。
-2. 在相同页面 Variables 中增加 `TCB_ENABLED=true`。
-3. 在 Actions 中手动运行「Deploy to Tencent CloudBase」，以后更新 `index.html` 会自动重新部署。
+部署源文件为仓库根目录的 `index.html`：工作流运行时自动复制到 `dist/index.html` 并通过 CloudBase CLI 上传。仓库里同时保留 `dist/index.html`，兼容之前在 CloudBase 控制台使用的 `./dist` 部署配置。
 
-**不要将腾讯云 SecretKey 放进代码或聊天消息。** 推荐为部署创建最小权限凭据。
+### 首次授权（仅一次）
 
-官方文档：https://docs.cloudbase.net/hosting/cli-devops
+1. 为自动发布创建权限尽量小的腾讯云 CAM 子用户 API 密钥，或者使用已有的专用部署密钥。
+2. 前往 [本仓库 Actions Secrets 设置](https://github.com/pupu838/water/settings/secrets/actions)，分别创建三个 Repository secrets：
+   - `TCB_SECRET_ID`：腾讯云部署密钥 SecretId
+   - `TCB_SECRET_KEY`：腾讯云部署密钥 SecretKey
+   - `TCB_ENV_ID`：原网站所属 **环境 ID**（不是环境名称）
+3. 前往 [Actions 工作流](https://github.com/pupu838/water/actions/workflows/cloudbase.yml)，选择 `Deploy to Tencent CloudBase`，点击 `Run workflow` 手动运行首次部署；确认成功后，后续对 `main` 分支的 `index.html` 更新将自动发布。
+
+安全说明：不要把腾讯云密钥写入代码、Issue 或聊天内容；如果密钥意外泄露应立即停用并轮换。新建 SecretKey 时请妥善保存，腾讯云后续无法再次显示它。
+
+官方指南：https://docs.cloudbase.net/hosting/cli-devops
