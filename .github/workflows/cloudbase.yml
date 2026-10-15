@@ -13,7 +13,6 @@ permissions:
 
 jobs:
   deploy:
-    if: ${{ vars.TCB_ENABLED == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout source
@@ -48,4 +47,5 @@ jobs:
         shell: bash
         run: |
           test -n "$TCB_ENV_ID" || { echo "Missing CloudBase environment ID"; exit 1; }
-          tcb hosting deploy ./dist / -e "$TCB_ENV_ID"
+          # Reuse the current CloudBase hosting directory to preserve the existing website path.
+          tcb hosting deploy ./dist /agri-water-remote-sensing -e "$TCB_ENV_ID"
