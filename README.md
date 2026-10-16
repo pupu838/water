@@ -1,16 +1,10 @@
 # 农业水利 × 遥感｜100 篇论文研究导航
 
-## 长期公开网址：GitHub Pages（待首次启用）
+## 长期公开网址：GitHub Pages（已上线）
 
 本仓库新增独立的 [GitHub Pages 自动发布工作流](.github/workflows/github-pages.yml)，无需域名购买或额外的部署密钥，网页仍然使用本仓库 `main/index.html`。每次更新 `index.html` 将自动重新发布；EdgeOne Makers 的旧网站不会因此被删除。
 
-**首次启用必须由仓库管理员在 [Settings → Pages](https://github.com/pupu838/water/settings/pages) 完成一次设置**：
-
-1. 在 Build and deployment 下将 **Source** 设为 **GitHub Actions**。
-2. 在 [发布工作流](https://github.com/pupu838/water/actions/workflows/github-pages.yml) 重新运行此前失败的任务，或手动运行工作流。
-3. 只有部署显示成功后，正式使用 `https://pupu838.github.io/water/`。
-
-说明：此方案不再依赖 EdgeOne 三小时预览链接，但并不保证 `github.io` 在中国大陆每条网络上都能始终正常访问；需通过实际网络测试。若未来必须确保中国大陆长期稳定使用，仍应考虑已合规的自定义域名与境内托管方案。
+**正式网址：** https://pupu838.github.io/water/ （2026-10-16 已由 GitHub Actions 成功发布）\n\n**已核验：** [成功部署记录](https://github.com/pupu838/water/actions/runs/38919296490)；GitHub Pages 发布日志确认页面 URL。GitHub Pages 默认域名的大陆连通性没有从使用者网络实测，不保证各地区可用。\n\n说明：此方案不再依赖 EdgeOne 三小时预览链接，但并不保证 `github.io` 在中国大陆每条网络上都能始终正常访问；需通过实际网络测试。若未来必须确保中国大陆长期稳定使用，仍应考虑已合规的自定义域名与境内托管方案。
 
 ## 当前线上部署：腾讯云 EdgeOne Makers
 
