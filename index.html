@@ -134,7 +134,7 @@ a{color:var(--green)}
       <div class="metric"><div class="n">10</div><div class="label">研究方向</div></div>
       <div class="metric"><div class="n">3</div><div class="label">本次核实原文入口</div></div>
     </section>
-    <div class="notice"><strong>使用说明 / 资料可信度：</strong>旧版知网 <code>v=</code> 动态链接已移除，不再提供可能过期的链接。<strong>核实原文</strong>是已找到对应文献页面的少量论文；其他文献只提供带完整题名的知网、百度学术和 Google Scholar 检索入口，不保证数据库有全文。旧表中的「摘要（中文概译）」高度模板化，<strong>不能作为论文真实摘要引用</strong>，本页只当作旧表的方向概览显示。下载量、被引量也只是旧表 2026-09-20 的记录值，并非实时数据。</div>
+    <div class="notice"><strong>使用说明 / 资料可信度：</strong>旧版知网 <code>v=</code> 动态链接已移除，不再提供可能过期的链接。<strong>核实原文</strong>是已找到对应文献页面的少量论文；其他文献提供知网「篇名＋第一作者」专业检索入口及备用题名检索，并保留百度学术和 Google Scholar 入口，不保证数据库有全文。旧表中的「摘要（中文概译）」高度模板化，<strong>不能作为论文真实摘要引用</strong>，本页只当作旧表的方向概览显示。下载量、被引量也只是旧表 2026-09-20 的记录值，并非实时数据。</div>
     <div class="section-bar">
       <div><h2 class="section-title">先从这三篇开始</h2><div class="section-desc">已找到可对应的文献页面，与你的土壤水分、作物遥感和 RGB 研究更相关</div></div>
     </div>
@@ -207,11 +207,50 @@ function sorted(arr){
 function renderChips(){
  el('chips').innerHTML=['全部方向',...categories].map(c=>`<button class="chip ${state.category===c?'active':''}" data-category="${esc(c)}" type="button">${esc(c)}</button>`).join('');
 }
+// CNKI 专业检索：篇名与第一作者同时限定。作者数据沿用原表，未经核实的作者仍需原文核对。
+function cnkiFirstAuthor(p){
+ return String(p.authors||'').split(/[;；、，,]/).map(s=>s.trim()).find(Boolean)||'';
+}
+function cnkiExpertExpression(p){
+ const clean=s=>String(s||'').trim().replaceAll("'", "''");
+ const title=clean(p.title);
+ const author=clean(cnkiFirstAuthor(p));
+ return author?`TI%='${title}' AND AU='${author}'`:`TI%='${title}'`;
+}
+function submitCnkiExpert(p){
+ const expression=cnkiExpertExpression(p);
+ const q={
+  Platform:'',Resource:'CROSSDB',Classid:'WD0FTY92',Products:'',
+  QNode:{QGroup:[
+   {Key:'Subject',Title:'',Logic:0,Items:[{Key:'Expert',Title:'',Logic:0,Field:'EXPERT',Operator:0,Value:expression,Value2:''}],ChildItems:[]},
+   {Key:'ControlGroup',Title:'',Logic:0,Items:[],ChildItems:[]}
+  ]},
+  ExScope:'1',SearchType:4,Rlang:'CHINESE',
+  KuaKuCode:'YSTT4HG0,LSTPFY1C,JUP3MUPD,MPMFIG1A,WQ0UVIAA,BLZOG7CK,PWFIRAGL,EMRPGLPA,NLBO1Z6R,NN3FJMUV',
+  SearchFrom:1
+ };
+ const fields={
+  boolSearch:'true',QueryJson:JSON.stringify(q),pageNum:'1',pageSize:'20',
+  sortField:'',sortType:'',dstyle:'listmode',
+  productStr:'YSTT4HG0,LSTPFY1C,RMJLXHZ3,JQIRZIYA,JUP3MUPD,1UR4K4HZ,BPBAFJ5S,R79MZMCB,MPMFIG1A,EMRPGLPA,J708GVCE,ML4DRIDX,WQ0UVIAA,NB3BWEHK,XVLO76FD,HR1YT1Z9,BLZOG7CK,PWFIRAGL,NN3FJMUV,NLBO1Z6R,',
+  aside:'（篇名：'+p.title+'）AND（作者：'+cnkiFirstAuthor(p)+'）',
+  searchFrom:'资源范围：总库; 时间范围：更新时间：不限;',CurPage:'1'
+ };
+ // POST 到知网高级检索的结果接口，避免将作者误当成主题关键词。
+ const form=document.createElement('form');
+ form.method='POST';form.action='https://kns.cnki.net/kns8s/brief/grid';
+ form.target='_blank';form.style.display='none';
+ for(const [key,value] of Object.entries(fields)){
+  const input=document.createElement('input');input.type='hidden';input.name=key;input.value=value;form.appendChild(input);
+ }
+ document.body.appendChild(form);form.submit();form.remove();
+ showToast('已按篇名＋第一作者提交知网检索；若知网拒绝跨站请求，请用详情里的备用入口');
+}
 function sourceButtons(p,primary=false){
  let links='';
  if(p.article_url)links+=`<a class="${primary?'btn primary':''}" href="${esc(safeLink(p.article_url))}" target="_blank" rel="noopener noreferrer">${primary?'打开核实原文 ↗':'核实原文 ↗'}</a>`;
  if(p.pdf_url)links+=`<a class="${primary?'btn':''}" href="${esc(safeLink(p.pdf_url))}" target="_blank" rel="noopener noreferrer">PDF ↗</a>`;
- if(!primary)links+=`<a href="${esc(safeLink(p.cnki_url))}" target="_blank" rel="noopener noreferrer">知网检索 ↗</a>`;
+ if(!primary)links+=`<button type="button" data-cnki="${p.id}" title="限定篇名和第一作者，在知网专业检索中使用 AND 条件">知网检索（篇名＋作者） ↗</button>`;
  return links;
 }
 function render(){
@@ -257,12 +296,13 @@ function openDetail(id){
  <div class="btn-row">
  ${p.article_url?`<a class="btn primary" href="${esc(safeLink(p.article_url))}" target="_blank" rel="noopener noreferrer">已核实文献页 ↗</a>`:''}
  ${p.pdf_url?`<a class="btn" href="${esc(safeLink(p.pdf_url))}" target="_blank" rel="noopener noreferrer">论文 PDF ↗</a>`:''}
- <a class="btn" href="${esc(safeLink(p.cnki_url))}" target="_blank" rel="noopener noreferrer">知网题名检索 ↗</a>
+ <button class="btn" type="button" data-cnki="${p.id}">知网精准检索（篇名＋作者） ↗</button>
+ <a class="btn" href="${esc(safeLink(p.cnki_url))}" target="_blank" rel="noopener noreferrer">仅按篇名检索（备用） ↗</a>
  <a class="btn" href="${esc(safeLink(p.baidu_url))}" target="_blank" rel="noopener noreferrer">百度学术检索 ↗</a>
  <a class="btn" href="${esc(safeLink(p.scholar_url))}" target="_blank" rel="noopener noreferrer">Google Scholar ↗</a>
  </div>
  <div class="btn-row"><button class="btn" id="copyTitle">复制题名</button><button class="btn" id="copyCitation">复制参考文献草稿</button><button class="btn" id="drawerSave">${saved.has(p.id)?'★ 已收藏':'☆ 收藏论文'}</button></div>
- <p style="font-size:12px">提示：检索按钮打开的是论文标题查询结果，不等于直接全文链接。知网可能要求校园网或学校 VPN；Google Scholar 在部分地区可能无法使用。参考文献草稿须核对论文原文的页码、期号及 DOI 后才能正式使用。</p>
+ <p style="font-size:12px">提示：知网精准检索使用「篇名 AND 第一作者」专业检索；若知网拒绝外部页面提交，可改用旁边的题名检索，再手动用作者筛选。检索结果不是直接全文链接。知网可能要求校园网或学校 VPN；Google Scholar 在部分地区可能无法使用。参考文献草稿须核对论文原文的页码、期号及 DOI 后才能正式使用。</p>
  ${p.evidence?`<h3>核实说明</h3><p>${esc(p.evidence)}</p>`:''}
  <h3>旧表研究方向概览 · 非论文原始摘要</h3>
  <p>${esc(p.abstract_old)}</p>
@@ -271,6 +311,7 @@ function openDetail(id){
  <div class="btn-row"><button class="btn primary" id="saveNote">保存笔记</button></div>`;
  el('overlay').classList.add('visible');document.body.style.overflow='hidden';
  el('closeDrawer').onclick=closeDetail;
+ el('drawer').querySelector('[data-cnki]').onclick=()=>submitCnkiExpert(p);
  el('copyTitle').onclick=()=>copy(p.title,'已复制论文题名');
  el('copyCitation').onclick=()=>copy(citations(p),'已复制参考文献草稿，请核对出版信息');
  el('drawerSave').onclick=()=>{toggleSaved(p.id);el('drawerSave').textContent=saved.has(p.id)?'★ 已收藏':'☆ 收藏论文';};
@@ -282,7 +323,7 @@ el('search').addEventListener('input',e=>{state.query=e.target.value;state.page=
 el('type').addEventListener('change',e=>{state.type=e.target.value;state.page=1;render()});
 el('sort').addEventListener('change',e=>{state.sort=e.target.value;state.page=1;render()});
 el('chips').addEventListener('click',e=>{const t=e.target.closest('[data-category]');if(!t)return;state.category=t.dataset.category;state.page=1;render()});
-el('results').addEventListener('click',e=>{let t=e.target.closest('[data-detail]');if(t)return openDetail(Number(t.dataset.detail));let s=e.target.closest('[data-save]');if(s)return toggleSaved(Number(s.dataset.save))});
+el('results').addEventListener('click',e=>{let t=e.target.closest('[data-detail]');if(t)return openDetail(Number(t.dataset.detail));let s=e.target.closest('[data-save]');if(s)return toggleSaved(Number(s.dataset.save));let k=e.target.closest('[data-cnki]');if(k)return submitCnkiExpert(papers.find(p=>p.id===Number(k.dataset.cnki)))});
 document.querySelectorAll('[data-side]').forEach(e=>e.addEventListener('click',()=>{state.side=e.dataset.side;state.page=1;render();document.querySelector('#catalogue').scrollIntoView({behavior:'smooth',block:'start'})}));
 el('clear').onclick=()=>{state={query:'',type:'all',category:'全部方向',side:'all',sort:'priority',page:1};el('search').value='';el('type').value='all';el('sort').value='priority';render()};
 el('prev').onclick=()=>{state.page--;render();el('catalogue').scrollIntoView({behavior:'smooth'})};
