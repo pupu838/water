@@ -1,5 +1,23 @@
 # 农业水利 × 遥感｜100 篇论文研究导航
 
+## 当前线上部署：腾讯云 EdgeOne Makers
+
+本仓库 `main/index.html` 是农业水利与遥感 100 篇论文网页的**唯一源码入口**。
+
+- 腾讯云 Makers 项目：`agri-water-remote-sensing-library`
+- 项目 ID：`makers-n3bdnbdo1ez0`
+- 自动发布工作流：[`pupu838/chatgpt-share-text-extractor` → `deploy-agri-water-edgeone.yml`](https://github.com/pupu838/chatgpt-share-text-extractor/blob/master/.github/workflows/deploy-agri-water-edgeone.yml)
+- 复用旧仓库已有的 `EDGEONE_API_TOKEN` GitHub Secret；凭证没有复制到本仓库。
+- 工作流每 15 分钟读取本仓库 `main` 分支，仅当 Git SHA 尚未发布时才向独立 Makers 项目部署。
+- 已验证首次 EdgeOne 正式发布成功，且云端 HTTP 访问返回 200、存在农业水利相关页面内容。
+- EdgeOne 默认域名在中国大陆可能要求带有 3 小时有效期的预览签名 URL。请从 [项目控制台](https://console.cloud.tencent.com/edgeone/pages/project/makers-n3bdnbdo1ez0) 获取最新访问入口；需要长久可靠地在中国大陆公开访问时，应考虑符合当地要求的自定义域名。
+- 之前的 CloudBase 环境**暂时保留**；不要在没有用户明确确认前删除。
+
+以后修改网站时，编辑本仓库根目录 `index.html` 即可；不需要同步修改旧提取器的网页代码。自动发布可能有定时轮询与平台队列延迟，并非立即生效。
+
+---
+
+
 纯静态文献导航页（HTML + CSS + JavaScript），包含 50 篇博士论文与 50 篇期刊论文。
 
 ## 功能和注意事项
