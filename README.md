@@ -1,5 +1,17 @@
 # 农业水利 × 遥感｜100 篇论文研究导航
 
+## 长期公开网址：GitHub Pages（待首次启用）
+
+本仓库新增独立的 [GitHub Pages 自动发布工作流](.github/workflows/github-pages.yml)，无需域名购买或额外的部署密钥，网页仍然使用本仓库 `main/index.html`。每次更新 `index.html` 将自动重新发布；EdgeOne Makers 的旧网站不会因此被删除。
+
+**首次启用必须由仓库管理员在 [Settings → Pages](https://github.com/pupu838/water/settings/pages) 完成一次设置**：
+
+1. 在 Build and deployment 下将 **Source** 设为 **GitHub Actions**。
+2. 在 [发布工作流](https://github.com/pupu838/water/actions/workflows/github-pages.yml) 重新运行此前失败的任务，或手动运行工作流。
+3. 只有部署显示成功后，正式使用 `https://pupu838.github.io/water/`。
+
+说明：此方案不再依赖 EdgeOne 三小时预览链接，但并不保证 `github.io` 在中国大陆每条网络上都能始终正常访问；需通过实际网络测试。若未来必须确保中国大陆长期稳定使用，仍应考虑已合规的自定义域名与境内托管方案。
+
 ## 当前线上部署：腾讯云 EdgeOne Makers
 
 本仓库 `main/index.html` 是农业水利与遥感 100 篇论文网页的**唯一源码入口**。
@@ -11,7 +23,7 @@
 - 工作流每 15 分钟读取本仓库 `main` 分支，仅当 Git SHA 尚未发布时才向独立 Makers 项目部署。
 - 已验证首次 EdgeOne 正式发布成功，且云端 HTTP 访问返回 200、存在农业水利相关页面内容。
 - EdgeOne 默认域名在中国大陆可能要求带有 3 小时有效期的预览签名 URL。请从 [项目控制台](https://console.cloud.tencent.com/edgeone/pages/project/makers-n3bdnbdo1ez0) 获取最新访问入口；需要长久可靠地在中国大陆公开访问时，应考虑符合当地要求的自定义域名。
-- 之前的 CloudBase 环境**暂时保留**；不要在没有用户明确确认前删除。
+- CloudBase 环境已由用户于 2026-10-15 确认销毁；历史部署说明仅为存档，不再作为有效发布渠道。
 
 以后修改网站时，编辑本仓库根目录 `index.html` 即可；不需要同步修改旧提取器的网页代码。自动发布可能有定时轮询与平台队列延迟，并非立即生效。
 
@@ -26,7 +38,7 @@
 
 文献数据来自此前整理的 100 篇论文表。少量论文已提供核实过的原文入口，其余以检索入口为主；用于正式论文引用前，请再核实题名、作者、发表年份和 DOI。
 
-## 腾讯云 CloudBase 静态网站托管
+## 历史方案：腾讯云 CloudBase 静态网站托管（环境已销毁）
 
 推荐从 [腾讯云开发控制台](https://console.cloud.tencent.com/tcb) 直接导入本仓库：
 
@@ -40,7 +52,7 @@
 
 官方文档：https://docs.cloudbase.net/hosting/web-hosting
 
-## GitHub Actions 同步到现有腾讯云环境
+## 历史方案：CloudBase GitHub Actions（环境已销毁）
 
 已部署的网站不需要重新创建。自动化工作流 `.github/workflows/cloudbase.yml` 使用现有的 CloudBase 环境和原部署日志中的云端路径 `/agri-water-remote-sensing`，以保留现有路径和域名绑定。
 
