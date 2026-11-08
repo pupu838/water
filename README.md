@@ -46,9 +46,11 @@
 
 官方文档：https://docs.cloudbase.net/hosting/web-hosting
 
-## 历史方案：CloudBase GitHub Actions（环境已销毁）
+## 历史方案：CloudBase GitHub Actions（环境已销毁，工作流已移除）
 
-已部署的网站不需要重新创建。自动化工作流 `.github/workflows/cloudbase.yml` 使用现有的 CloudBase 环境和原部署日志中的云端路径 `/agri-water-remote-sensing`，以保留现有路径和域名绑定。
+**2026-11-08 更新：** CloudBase 环境早已销毁，旧工作流 `.github/workflows/cloudbase.yml` 因缺少腾讯云凭证持续报错，现已从 `main` 删除，避免每次更新网站时重复触发失败通知。当前自动发布使用 `.github/workflows/github-pages.yml`，以下 CloudBase 配置仅作为历史参考，不再执行。
+
+原 CloudBase 工作流曾使用云端路径 `/agri-water-remote-sensing`；已不再是有效部署方案。
 
 部署源文件为仓库根目录的 `index.html`：工作流运行时自动复制到 `dist/index.html` 并通过 CloudBase CLI 上传。仓库里同时保留 `dist/index.html`，兼容之前在 CloudBase 控制台使用的 `./dist` 部署配置。
 
